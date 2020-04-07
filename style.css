@@ -56,6 +56,7 @@ img{
     background-color: #7c4dff;
 }   
 .square{
+    user-select: none;
     z-index: 5;
     background-color: #fff;
     font-size: 24px;
@@ -67,8 +68,13 @@ img{
     width: 25%;
     height: 25%;
 }
+.square:hover{
+    background-color: #eee;
+    cursor: pointer;
+}
 
 .square.empty{
+    background-color: #ddd;
     z-index: 3;
 }
 .panel{

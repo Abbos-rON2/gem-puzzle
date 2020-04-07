@@ -90,7 +90,7 @@ function render(value, eS) {
     case 'down':
       let promise = new Promise(function (resolve, reject) {
         state.animation = true
-        setTimeout(() => resolve(elem), 500);
+        setTimeout(() => resolve(elem), 200);
         elem.style.transform = 'translateY(100%)';
       });
       promise.then(() => { drawPuzzle(); state.animation = false })
@@ -98,7 +98,7 @@ function render(value, eS) {
     case 'up':
       let promise1 = new Promise(function (resolve, reject) {
         state.animation = true
-        setTimeout(() => resolve(elem), 500);
+        setTimeout(() => resolve(elem), 200);
         elem.style.transform = 'translateY(-100%)';
       });
       promise1.then(() => { drawPuzzle(); state.animation = false })
@@ -106,7 +106,7 @@ function render(value, eS) {
     case 'left':
       let promise2 = new Promise(function (resolve, reject) {
         state.animation = true
-        setTimeout(() => resolve(elem), 500);
+        setTimeout(() => resolve(elem), 200);
         elem.style.transform = 'translateX(-100%)';
       });
       promise2.then(() => { drawPuzzle(); state.animation = false })
