@@ -1,14 +1,18 @@
-/* eslint-disable linebreak-style */
 const state = {
   animation: false,
   time: false,
   stepCount: 0,
-  winCase: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', ' '],
+  winCase: [],
+  size: 4,
+  current: [],
 };
 let eS = [];
 let arr = [];
-const gameState = [[], [], [], []];
+const gameState = [[], [], [], [], [], [], [], []];
 
+for (let m = 1; m <= 64; m += 1) {
+  state.winCase.push(String(m));
+}
 
 // Секундомер /////////////////////////////////////////////
 
@@ -126,7 +130,8 @@ function StartStop() {
 
 
 function shuffle(array) {
-  const shuffled = array.slice();
+  const shuffled = array.slice(0, state.size ** 2);
+  shuffled[state.size ** 2 - 1] = ' ';
   shuffled.sort(() => Math.random() - 0.5);
   return shuffled;
 }
@@ -138,94 +143,59 @@ function restartPuzzle() {
   document.querySelector('.panel').before(puzzle);
   const randomArray = shuffle(state.winCase);
   eS = [];
-  eS.push(Math.floor(randomArray.indexOf(' ') / 4)); eS.push(randomArray.indexOf(' ') % 4);
-
-  for (let i = 0; i < 4; i += 1) {
-    for (let k = 0; k < 4; k += 1) {
+  eS.push(Math.floor(randomArray.indexOf(' ') / state.size)); eS.push(randomArray.indexOf(' ') % state.size);
+  state.stepCount = 0;
+  document.querySelector('.stepCount').innerHTML = `Ходов: ${state.stepCount}`;
+  for (let i = 0; i < state.size; i += 1) {
+    for (let k = 0; k < state.size; k += 1) {
       const n = randomArray.shift();
       gameState[i][k] = n;
       const square = document.createElement('div');
       square.classList.add('square');
+      square.draggable = true;
       square.innerText = n;
       if (n === ' ') {
         square.classList.add('empty');
       }
+      square.classList.add(`s${state.size}`);
       document.querySelector('.puzzle').append(square);
     }
   }
 }
-function init() {
-  const h2 = document.createElement('h2');
-  h2.innerHTML = 'Gem Puzzle';
-  const container = document.createElement('div');
-  const puzzle = document.createElement('div');
-  const panel = document.createElement('div');
-  const stepCount = document.createElement('div');
-  const playBtn = document.createElement('button');
-  const time = document.createElement('div');
-  const restart = document.createElement('button');
-  const modal = document.createElement('div');
-  const overlay = document.createElement('div');
 
-  modal.className = 'modal';
-  overlay.className = 'overlay';
-  restart.className = 'restart';
-  restart.innerHTML = 'Рестарт';
-  time.className = 'time';
-  time.innerHTML = '00:00:00';
-  playBtn.className = 'playBtn';
-  playBtn.innerHTML = 'Старт';
-  stepCount.className = 'stepCount';
-  stepCount.innerHTML = 'Ходов: 0';
-  panel.className = 'panel';
-  container.className = 'container';
-  puzzle.className = 'puzzle';
-  document.body.append(container);
-  document.body.append(modal);
-  document.body.append(overlay);
-  container.append(h2);
-  container.append(puzzle);
-  container.append(panel);
-  panel.append(stepCount);
-  panel.append(playBtn);
-  panel.append(restart);
-  panel.append(time);
-
-  const randomArray = shuffle(state.winCase);
-  eS.push(Math.floor(randomArray.indexOf(' ') / 4)); eS.push(randomArray.indexOf(' ') % 4);
-
-  for (let i = 0; i < 4; i += 1) {
-    for (let k = 0; k < 4; k += 1) {
-      const n = randomArray.shift();
-      gameState[i][k] = n;
-      const square = document.createElement('div');
-      square.classList.add('square');
-      square.innerText = n;
-      if (n === ' ') {
-        square.classList.add('empty');
-      }
-      document.querySelector('.puzzle').append(square);
-    }
-  }
-}
 function drawPuzzle() {
   document.querySelector('.puzzle').remove();
   const puzzle = document.createElement('div');
   puzzle.className = 'puzzle';
   document.querySelector('.panel').before(puzzle);
-  for (let i = 0; i < 4; i += 1) {
-    for (let k = 0; k < 4; k += 1) {
+  for (let i = 0; i < state.size; i += 1) {
+    for (let k = 0; k < state.size; k += 1) {
       const square = document.createElement('div');
       square.className = 'square';
+      square.classList.add(`s${state.size}`);
       square.innerText = gameState[i][k];
       document.querySelector('.puzzle').append(square);
     }
   }
-  document.querySelector(`.square:nth-child(${eS[0] * 4 + eS[1] + 1})`).classList.add('empty');
+  document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1] + 1})`).classList.add('empty');
+  document.querySelector('.empty').classList.add('dropzone');
+  if (eS[0] + 1 < state.size) {
+    document.querySelector(`.square:nth-child(${(eS[0] + 1) * state.size + eS[1] + 1})`).draggable = true;
+  }
+  if (eS[0] - 1 >= 0) {
+    document.querySelector(`.square:nth-child(${(eS[0] - 1) * state.size + eS[1] + 1})`).draggable = true;
+  }
+  if (eS[1] + 1 < state.size) {
+    document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1] + 2})`).draggable = true;
+  }
+  if (eS[1] - 1 >= 0) {
+    document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1]})`).draggable = true;
+  }
 }
+
 function render(value, emptyS) {
   const [x, y] = emptyS;
-  const elem = document.querySelector(`.square:nth-child(${x * 4 + y + 1})`);
+  const elem = document.querySelector(`.square:nth-child(${x * state.size + y + 1})`);
   switch (value) {
     case 'down':
       if (value !== null) {
@@ -279,12 +249,21 @@ function winner() {
       arr.push(gameState[i][k]);
     }
   }
-  state.winCase.forEach((item, index) => {
+  state.winCase.slice(0, state.size ** 2).forEach((item, index) => {
     if (item === arr[index]) {
       n += 1;
     }
   });
-  if (n === 16) {
+  if (n === state.size ** 2) {
+    const tops = {
+      type: state.size,
+      time: document.querySelector('.time').innerHTML,
+      steps: state.stepCount,
+    };
+    const res = JSON.parse(localStorage.getItem('topList'));
+    res.push(tops);
+    localStorage.setItem('topList', JSON.stringify(res));
+    state.topList.push(tops);
     const img = document.createElement('img');
     img.src = './success.gif';
     document.querySelector('.modal').classList.add('active');
@@ -293,6 +272,184 @@ function winner() {
     img.onload = () => { document.querySelector('.modal').append(img); };
   } else { console.log(`Готовых блоков: ${n}`); }
 }
+
+let dragged;
+
+/* events fired on the draggable target */
+document.addEventListener('drag', () => {
+
+}, false);
+
+document.addEventListener('dragstart', (e) => {
+  // store a ref. on the dragged elem
+  dragged = e.target;
+  // make it half transparent
+  e.target.style.opacity = 0.5;
+}, false);
+
+document.addEventListener('dragend', (e) => {
+  // reset the transparency
+  e.target.style.opacity = '';
+}, false);
+
+/* events fired on the drop targets */
+document.addEventListener('dragover', (e) => {
+  // prevent default to allow drop
+  e.preventDefault();
+}, false);
+
+document.addEventListener('dragenter', (e) => {
+  // highlight potential drop target when the draggable element enters it
+  if (e.target.classList.contains('dropzone')) {
+    e.target.style.background = 'purple';
+  }
+}, false);
+
+document.addEventListener('dragleave', (e) => {
+  // reset background of potential drop target when the draggable element leaves it
+  if (e.target.classList.contains('dropzone')) {
+    e.target.style.background = '';
+  }
+}, false);
+
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.target.classList.contains('dropzone')) {
+    e.target.style.background = '';
+    dragged.classList.add('empty');
+    e.target.classList.remove('empty');
+    e.target.innerHTML = dragged.innerHTML;
+    let c;
+    gameState.forEach((el, idx) => {
+      if (el.indexOf(dragged.innerHTML) !== -1) {
+        c = [idx, el.indexOf(dragged.innerHTML)];
+      }
+    });
+    const val = gameState[c[0]][c[1]];
+    gameState[c[0]][c[1]] = gameState[eS[0]][eS[1]];
+    gameState[eS[0]][eS[1]] = val;
+    eS = c;
+    dragged.innerHTML = ' ';
+    drawPuzzle();
+  }
+}, false);
+
+function topPlayers() {
+  if (localStorage.getItem('topList') !== null) {
+    let topList = JSON.parse(localStorage.getItem('topList'));
+    topList = topList.sort((a, b) => {
+      if (a.steps > b.steps) {
+        return 1;
+      }
+      if (a.steps < b.steps) {
+        return -1;
+      }
+      return 0;
+    });
+    const ol = document.createElement('ol');
+    document.querySelector('.modal-2').append(ol);
+    topList.forEach((el) => {
+      const li = document.createElement('li');
+      li.innerHTML = `Игра: ${el.type}x${el.type}, Ходов ${el.steps}, Время ${el.time}`;
+      document.querySelector('ol').append(li);
+    });
+  } else {
+    const text = document.createElement('div');
+    text.innerHTML = 'Список пуст. Будь первым!';
+    document.querySelector('.modal-2').append(text);
+  }
+}
+function init() {
+  const h2 = document.createElement('h2');
+  h2.innerHTML = 'Gem Puzzle';
+  const container = document.createElement('div');
+  const puzzle = document.createElement('div');
+  const panel = document.createElement('div');
+  const stepCount = document.createElement('div');
+  const playBtn = document.createElement('button');
+  const time = document.createElement('div');
+  const restart = document.createElement('button');
+  const modal = document.createElement('div');
+  const modal2 = document.createElement('div');
+  const overlay = document.createElement('div');
+  const score = document.createElement('div');
+  const select = document.createElement('select');
+  score.innerHTML = 'Результаты';
+  score.className = 'result';
+  score.onclick = () => {
+    document.querySelector('.modal-2').classList.add('active');
+    document.querySelector('.overlay').classList.add('active');
+    document.querySelector('.modal-2').innerHTML = 'Топ 10 лучших:';
+    topPlayers();
+  };
+  select.innerHTML = '<option>3x3</option><option>4x4</option><option>5x5</option>'
+  + '<option>6x6</option><option>7x7</option><option>8x8</option>';
+  select.value = '4x4';
+
+  modal.className = 'modal';
+  modal2.className = 'modal-2 modal';
+  overlay.className = 'overlay';
+  restart.className = 'restart';
+  restart.innerHTML = 'Рестарт';
+  time.className = 'time';
+  time.innerHTML = '00:00:00';
+  playBtn.className = 'playBtn';
+  playBtn.innerHTML = 'Старт';
+  stepCount.className = 'stepCount';
+  stepCount.innerHTML = 'Ходов: 0';
+  panel.className = 'panel';
+  container.className = 'container';
+  puzzle.className = 'puzzle';
+  document.body.append(container);
+  document.body.append(modal);
+  document.body.append(overlay);
+  document.body.append(modal2);
+  container.append(h2);
+  container.append(puzzle);
+  container.append(panel);
+  panel.append(stepCount);
+  panel.append(playBtn);
+  panel.append(time);
+  panel.append(restart);
+  panel.append(select);
+  panel.append(score);
+
+
+  const randomArray = shuffle(state.winCase);
+  eS.push(Math.floor(randomArray.indexOf(' ') / state.size)); eS.push(randomArray.indexOf(' ') % state.size);
+
+  for (let i = 0; i < state.size; i += 1) {
+    for (let k = 0; k < state.size; k += 1) {
+      const n = randomArray.shift();
+      gameState[i][k] = n;
+      const square = document.createElement('div');
+      square.classList.add('square');
+      square.classList.add(`s${state.size}`);
+      square.innerText = n;
+      square.ondragstart = (e) => { e.dataTransfer.setData('text', e.target.innerHTML); };
+
+      if (n === ' ') {
+        square.classList.add('empty');
+        square.classList.add('dropzone');
+      }
+      document.querySelector('.puzzle').append(square);
+    }
+  }
+  if (eS[0] + 1 < state.size) {
+    document.querySelector(`.square:nth-child(${(eS[0] + 1) * state.size + eS[1] + 1})`).draggable = true;
+  }
+  if (eS[0] - 1 >= 0) {
+    document.querySelector(`.square:nth-child(${(eS[0] - 1) * state.size + eS[1] + 1})`).draggable = true;
+  }
+  if (eS[1] + 1 < state.size) {
+    document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1] + 2})`).draggable = true;
+  }
+  if (eS[1] - 1 >= 0) {
+    document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1]})`).draggable = true;
+  }
+}
+
+
 document.addEventListener('keydown', (e) => {
   if (state.animation === false && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
     if (!state.time) {
@@ -312,7 +469,7 @@ document.addEventListener('keydown', (e) => {
         }
         break;
       case 'ArrowUp':
-        if (eS[0] + 1 < 4) {
+        if (eS[0] + 1 < state.size) {
           state.stepCount += 1;
           document.querySelector('.stepCount').innerHTML = `Ходов: ${state.stepCount}`;
           const val = gameState[eS[0]][eS[1]];
@@ -324,7 +481,7 @@ document.addEventListener('keydown', (e) => {
         }
         break;
       case 'ArrowLeft':
-        if (eS[1] + 1 < 4) {
+        if (eS[1] + 1 < state.size) {
           state.stepCount += 1;
           document.querySelector('.stepCount').innerHTML = `Ходов: ${state.stepCount}`;
           const val = gameState[eS[0]][eS[1]];
@@ -355,9 +512,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-
 init();
-
 
 document.addEventListener('click', (e) => {
   if (e.target.className === 'playBtn') {
@@ -379,8 +534,7 @@ document.addEventListener('click', (e) => {
       }
     }
     const a = arr.indexOf(e.target.innerHTML);
-    const cS = [Math.floor(a / 4), a % 4];
-    // console.log(cS, eS)
+    const cS = [Math.floor(a / state.size), a % state.size];
     if (eS[0] === cS[0] + 1 && eS[1] === cS[1]) {
       // Down
       state.stepCount += 1;
@@ -426,7 +580,12 @@ document.addEventListener('click', (e) => {
 });
 
 
-document.querySelector('.modal').addEventListener('click', () => {
+document.querySelector('.overlay').addEventListener('click', () => {
   document.querySelector('.modal').classList.remove('active');
+  document.querySelector('.modal-2').classList.remove('active');
   document.querySelector('.overlay').classList.remove('active');
+});
+document.querySelector('select').addEventListener('change', () => {
+  state.size = Number(document.querySelector('select').value.slice(0, 1));
+  restartPuzzle();
 });
