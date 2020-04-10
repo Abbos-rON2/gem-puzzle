@@ -3,12 +3,12 @@ const state = {
   time: false,
   stepCount: 0,
   winCase: [],
-  size: 4,
+  size: 3,
   current: [],
 };
 let eS = [];
 let arr = [];
-const gameState = [[], [], [], [], [], [], [], []];
+let gameState = [[], [], [], [], [], [], [], []];
 
 for (let m = 1; m <= 64; m += 1) {
   state.winCase.push(String(m));
@@ -137,22 +137,23 @@ function shuffle(array) {
 }
 
 function restartPuzzle() {
+  eS = [];
+  gameState = [[], [], [], [], [], [], [], []];
+  state.stepCount = 0;
   document.querySelector('.puzzle').remove();
   const puzzle = document.createElement('div');
   puzzle.className = 'puzzle';
   document.querySelector('.panel').before(puzzle);
   const randomArray = shuffle(state.winCase);
-  eS = [];
   eS.push(Math.floor(randomArray.indexOf(' ') / state.size)); eS.push(randomArray.indexOf(' ') % state.size);
-  state.stepCount = 0;
   document.querySelector('.stepCount').innerHTML = `Ходов: ${state.stepCount}`;
+
   for (let i = 0; i < state.size; i += 1) {
     for (let k = 0; k < state.size; k += 1) {
       const n = randomArray.shift();
       gameState[i][k] = n;
       const square = document.createElement('div');
       square.classList.add('square');
-      square.draggable = true;
       square.innerText = n;
       if (n === ' ') {
         square.classList.add('empty');
@@ -160,6 +161,18 @@ function restartPuzzle() {
       square.classList.add(`s${state.size}`);
       document.querySelector('.puzzle').append(square);
     }
+  }
+  if (eS[0] + 1 < state.size) {
+    document.querySelector(`.square:nth-child(${(eS[0] + 1) * state.size + eS[1] + 1})`).draggable = true;
+  }
+  if (eS[0] - 1 >= 0) {
+    document.querySelector(`.square:nth-child(${(eS[0] - 1) * state.size + eS[1] + 1})`).draggable = true;
+  }
+  if (eS[1] + 1 < state.size) {
+    document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1] + 2})`).draggable = true;
+  }
+  if (eS[1] - 1 >= 0) {
+    document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1]})`).draggable = true;
   }
 }
 
@@ -360,6 +373,8 @@ function topPlayers() {
   }
 }
 function init() {
+  eS = [];
+  if (document.querySelector('.container')) { document.querySelector('.container').remove(); }
   const h2 = document.createElement('h2');
   h2.innerHTML = 'Gem Puzzle';
   const container = document.createElement('div');
@@ -384,7 +399,7 @@ function init() {
   };
   select.innerHTML = '<option>3x3</option><option>4x4</option><option>5x5</option>'
   + '<option>6x6</option><option>7x7</option><option>8x8</option>';
-  select.value = '4x4';
+  select.value = `${state.size}x${state.size}`;
 
   modal.className = 'modal';
   modal2.className = 'modal-2 modal';
