@@ -355,6 +355,7 @@ document.addEventListener('drop', (e) => {
     eS = c;
     dragged.innerHTML = ' ';
     drawPuzzle();
+    winner();
   }
 }, false);
 
