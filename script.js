@@ -265,26 +265,29 @@ function render(value, emptyS) {
 function winner() {
   let n = 0;
   arr = [];
+  const win = state.winCase.slice(0, state.size ** 2);
+  win[state.size ** 2 - 1] = ' ';
   for (let i = 0; i < gameState.length; i += 1) {
     for (let k = 0; k < gameState[i].length; k += 1) {
       arr.push(gameState[i][k]);
     }
   }
-  state.winCase.slice(0, state.size ** 2).forEach((item, index) => {
+  win.forEach((item, index) => {
     if (item === arr[index]) {
       n += 1;
     }
   });
   if (n === state.size ** 2) {
+    console.log('Выигрыш');
     const tops = {
       type: state.size,
       time: document.querySelector('.time').innerHTML,
       steps: state.stepCount,
     };
-    const res = JSON.parse(localStorage.getItem('topList'));
+    let res = JSON.parse(localStorage.getItem('topList'));
+    if (res) { res.push(tops); } else { res = [tops]; }
     res.push(tops);
     localStorage.setItem('topList', JSON.stringify(res));
-    state.topList.push(tops);
     const img = document.createElement('img');
     img.src = './success.gif';
     document.querySelector('.modal').classList.add('active');
@@ -373,10 +376,12 @@ function topPlayers() {
     });
     const ol = document.createElement('ol');
     document.querySelector('.modal-2').append(ol);
-    topList.forEach((el) => {
-      const li = document.createElement('li');
-      li.innerHTML = `Игра: ${el.type}x${el.type}, Ходов ${el.steps}, Время ${el.time}`;
-      document.querySelector('ol').append(li);
+    topList.forEach((el, index) => {
+      if (index < 10) {
+        const li = document.createElement('li');
+        li.innerHTML = `Игра: ${el.type}x${el.type}, Ходов ${el.steps}, Время ${el.time}`;
+        document.querySelector('ol').append(li);
+      }
     });
   } else {
     const text = document.createElement('div');
