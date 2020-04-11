@@ -3,7 +3,7 @@ const state = {
   time: false,
   stepCount: 0,
   winCase: [],
-  size: 3,
+  size: 4,
   current: [],
 };
 let eS = [];
@@ -137,6 +137,10 @@ function shuffle(array) {
 }
 
 function restartPuzzle() {
+  state.time = false;
+  clearTimeout(clocktimer);
+  ClearСlock();
+  document.querySelector('.playBtn').innerHTML = 'Старт';
   eS = [];
   gameState = [[], [], [], [], [], [], [], []];
   state.stepCount = 0;
@@ -157,6 +161,7 @@ function restartPuzzle() {
       square.innerText = n;
       if (n === ' ') {
         square.classList.add('empty');
+        square.classList.add('dropzone');
       }
       square.classList.add(`s${state.size}`);
       document.querySelector('.puzzle').append(square);
@@ -203,6 +208,9 @@ function drawPuzzle() {
   }
   if (eS[1] - 1 >= 0) {
     document.querySelector(`.square:nth-child(${eS[0] * state.size + eS[1]})`).draggable = true;
+  }
+  if (!state.time) {
+    StartStop();
   }
 }
 
@@ -327,6 +335,9 @@ document.addEventListener('dragleave', (e) => {
 
 document.addEventListener('drop', (e) => {
   e.preventDefault();
+  if (!state.time) {
+    StartStop();
+  }
   if (e.target.classList.contains('dropzone')) {
     e.target.style.background = '';
     dragged.classList.add('empty');
