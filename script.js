@@ -286,7 +286,6 @@ function winner() {
     };
     let res = JSON.parse(localStorage.getItem('topList'));
     if (res) { res.push(tops); } else { res = [tops]; }
-    res.push(tops);
     localStorage.setItem('topList', JSON.stringify(res));
     const img = document.createElement('img');
     img.src = './success.gif';
@@ -294,6 +293,7 @@ function winner() {
     document.querySelector('.overlay').classList.add('active');
     document.querySelector('.modal').innerHTML = `Ура! Вы решили головоломку за ${document.querySelector('.time').innerHTML} и ${state.stepCount} ходов `;
     img.onload = () => { document.querySelector('.modal').append(img); };
+    restartPuzzle();
   } else { console.log(`Готовых блоков: ${n}`); }
 }
 
